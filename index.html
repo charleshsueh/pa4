@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Presentation pa4</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Charles Hsueh" />
+    <meta name="date" content="2025-03-31" />
+    <script src="libs/header-attrs-2.29/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Presentation pa4
+]
+.subtitle[
+## ⚔<br/>with xaringan
+]
+.author[
+### Charles Hsueh
+]
+.institute[
+### ds4lin
+]
+.date[
+### 2025-03-31
+]
+
+---
+
+
+
+``` r
+library(readr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ds4ling)
+```
+
+---
+
+# 4
+
+
+``` r
+fricatives &lt;- read_csv("C:/Users/Charles/OneDrive/桌面/pa4/data_raw/fricatives.csv")
+```
+
+```
+## Rows: 50 Columns: 5
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## dbl (5): obs, s_cog, s_skewness, sh_cog, sh_skewness
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+```
+
+``` r
+fricatives
+```
+
+```
+## # A tibble: 50 × 5
+##      obs s_cog s_skewness sh_cog sh_skewness
+##    &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;
+##  1     1 3285.       2.72  2556.        2.31
+##  2     2 3511.       3.09  2781.        2.47
+##  3     3 4029.       3.33  2979.        2.48
+##  4     4 4123.       3.00  2997.        2.45
+##  5     5 4664.       2.88  3020.        2.65
+##  6     6 4680.       3.84  3097.        2.78
+##  7     7 4793.       3.53  3165.        2.10
+##  8     8 4811.       3.51  3253.        2.74
+##  9     9 4874.       3.43  3405.        2.78
+## 10    10 4879.       3.54  3432.        2.63
+## # ℹ 40 more rows
+```
+
+
+---
+# 5
+
+
+``` r
+fricatives |&gt;
+  pivot_longer(
+    cols = c(s_cog, s_skewness, sh_cog, sh_skewness),
+    names_to = c("sound", "measurement"),
+    names_pattern = "(s|sh)_(cog|skewness)",
+    values_to = "value"
+  ) |&gt;
+  select(obs, sound, measurement, value) |&gt;
+  arrange(obs, sound)|&gt;
+  write.csv("C:/Users/Charles/OneDrive/桌面/pa4/data_tidy/fricatives_tidy.csv", row.names = FALSE)
+
+fricatives_tidy = read.csv("C:/Users/Charles/OneDrive/桌面/pa4/data_tidy/fricatives_tidy.csv")
+fricatives_tidy
+```
+
+```
+##     obs sound measurement       value
+## 1     1     s         cog 3285.300113
+## 2     1     s    skewness    2.724530
+## 3     1    sh         cog 2556.033097
+## 4     1    sh    skewness    2.305261
+## 5     2     s         cog 3510.648304
+## 6     2     s    skewness    3.093099
+## 7     2    sh         cog 2781.146560
+## 8     2    sh    skewness    2.472007
+## 9     3     s         cog 4029.247616
+## 10    3     s    skewness    3.331941
+## 11    3    sh         cog 2978.726233
+## 12    3    sh    skewness    2.475432
+## 13    4     s         cog 4122.940443
+## 14    4     s    skewness    2.995289
+## 15    4    sh         cog 2997.093280
+## 16    4    sh    skewness    2.449014
+## 17    5     s         cog 4664.371388
+## 18    5     s    skewness    2.875139
+## 19    5    sh         cog 3020.309908
+## 20    5    sh    skewness    2.649265
+## 21    6     s         cog 4679.531616
+## 22    6     s    skewness    3.839298
+## 23    6    sh         cog 3096.509523
+## 24    6    sh    skewness    2.777500
+## 25    7     s         cog 4792.504843
+## 26    7     s    skewness    3.529666
+## 27    7    sh         cog 3164.692299
+## 28    7    sh    skewness    2.101727
+## 29    8     s         cog 4811.244305
+## 30    8     s    skewness    3.513888
+## 31    8    sh         cog 3252.721895
+## 32    8    sh    skewness    2.740909
+## 33    9     s         cog 4873.546189
+## 34    9     s    skewness    3.434093
+## 35    9    sh         cog 3405.381433
+## 36    9    sh    skewness    2.777636
+## 37   10     s         cog 4878.759419
+## 38   10     s    skewness    3.541401
+## 39   10    sh         cog 3432.042855
+## 40   10    sh    skewness    2.630968
+## 41   11     s         cog 5021.849945
+## 42   11     s    skewness    3.478050
+## 43   11    sh         cog 3510.378885
+## 44   11    sh    skewness    2.945392
+## 45   12     s         cog 5085.005437
+## 46   12     s    skewness    3.626642
+## 47   12    sh         cog 3528.383243
+## 48   12    sh    skewness    2.686344
+## 49   13     s         cog 5105.710046
+## 50   13     s    skewness    3.472806
+## 51   13    sh         cog 3541.387669
+## 52   13    sh    skewness    2.713828
+## 53   14     s         cog 5194.611613
+## 54   14     s    skewness    3.323264
+## 55   14    sh         cog 3545.065014
+## 56   14    sh    skewness    2.944014
+## 57   15     s         cog 5246.638320
+## 58   15     s    skewness    3.820887
+## 59   15    sh         cog 3565.983975
+## 60   15    sh    skewness    3.126917
+## 61   16     s         cog 5335.476404
+## 62   16     s    skewness    3.971687
+## 63   16    sh         cog 3621.279491
+## 64   16    sh    skewness    2.864651
+## 65   17     s         cog 5344.204493
+## 66   17     s    skewness    3.610354
+## 67   17    sh         cog 3645.366501
+## 68   17    sh    skewness    2.738246
+## 69   18     s         cog 5387.653788
+## 70   18     s    skewness    3.443169
+## 71   18    sh         cog 3706.222819
+## 72   18    sh    skewness    2.615289
+## 73   19     s         cog 5397.212273
+## 74   19     s    skewness    3.827054
+## 75   19    sh         cog 3756.652861
+## 76   19    sh    skewness    2.812120
+## 77   20     s         cog 5440.686603
+## 78   20     s    skewness    3.711401
+## 79   20    sh         cog 3891.857108
+## 80   20    sh    skewness    2.757963
+## 81   21     s         cog 5443.871260
+## 82   21     s    skewness    3.375292
+## 83   21    sh         cog 3891.956317
+## 84   21    sh    skewness    2.894192
+## 85   22     s         cog 5446.194959
+## 86   22     s    skewness    3.723524
+## 87   22    sh         cog 3968.607998
+## 88   22    sh    skewness    3.063180
+## 89   23     s         cog 5455.066391
+## 90   23     s    skewness    3.601473
+## 91   23    sh         cog 4000.884281
+## 92   23    sh    skewness    2.830071
+## 93   24     s         cog 5483.809737
+## 94   24     s    skewness    3.673711
+## 95   24    sh         cog 4022.401727
+## 96   24    sh    skewness    3.541034
+## 97   25     s         cog 5574.564983
+## 98   25     s    skewness    3.555968
+## 99   25    sh         cog 4059.473059
+## 100  25    sh    skewness    3.060939
+## 101  26     s         cog 5683.643324
+## 102  26     s    skewness    4.202450
+## 103  26    sh         cog 4122.602671
+## 104  26    sh    skewness    3.287343
+## 105  27     s         cog 5829.507772
+## 106  27     s    skewness    3.848527
+## 107  27    sh         cog 4151.033840
+## 108  27    sh    skewness    2.617692
+## 109  28     s         cog 5864.581962
+## 110  28     s    skewness    3.611188
+## 111  28    sh         cog 4213.679033
+## 112  28    sh    skewness    3.255040
+## 113  29     s         cog 5887.671612
+## 114  29     s    skewness    3.983274
+## 115  29    sh         cog 4233.156988
+## 116  29    sh    skewness    2.853329
+## 117  30     s         cog 5889.843236
+## 118  30     s    skewness    3.997557
+## 119  30    sh         cog 4266.360297
+## 120  30    sh    skewness    3.317141
+## 121  31     s         cog 5917.941560
+## 122  31     s    skewness    3.761805
+## 123  31    sh         cog 4272.895753
+## 124  31    sh    skewness    3.216074
+## 125  32     s         cog 5987.429052
+## 126  32     s    skewness    3.415930
+## 127  32    sh         cog 4296.015048
+## 128  32    sh    skewness    3.066502
+## 129  33     s         cog 6056.663199
+## 130  33     s    skewness    3.900235
+## 131  33    sh         cog 4318.484704
+## 132  33    sh    skewness    3.424094
+## 133  34     s         cog 6075.781352
+## 134  34     s    skewness    4.151992
+## 135  34    sh         cog 4380.407623
+## 136  34    sh    skewness    3.049957
+## 137  35     s         cog 6093.901321
+## 138  35     s    skewness    4.035006
+## 139  35    sh         cog 4446.789140
+## 140  35    sh    skewness    3.107272
+## 141  36     s         cog 6119.825748
+## 142  36     s    skewness    4.040277
+## 143  36    sh         cog 4455.775702
+## 144  36    sh    skewness    3.027673
+## 145  37     s         cog 6196.963375
+## 146  37     s    skewness    4.210646
+## 147  37    sh         cog 4475.156950
+## 148  37    sh    skewness    3.103943
+## 149  38     s         cog 6238.324705
+## 150  38     s    skewness    3.881871
+## 151  38    sh         cog 4488.581083
+## 152  38    sh    skewness    3.433328
+## 153  39     s         cog 6263.175748
+## 154  39     s    skewness    4.350943
+## 155  39    sh         cog 4551.791490
+## 156  39    sh    skewness    3.362636
+## 157  40     s         cog 6268.532925
+## 158  40     s    skewness    4.133198
+## 159  40    sh         cog 4560.170920
+## 160  40    sh    skewness    3.481117
+## 161  41     s         cog 6282.136301
+## 162  41     s    skewness    4.282530
+## 163  41    sh         cog 4850.479870
+## 164  41    sh    skewness    3.347216
+## 165  42     s         cog 6321.221195
+## 166  42     s    skewness    4.367432
+## 167  42    sh         cog 4928.322093
+## 168  42    sh    skewness    3.539435
+## 169  43     s         cog 6381.107726
+## 170  43     s    skewness    4.235250
+## 171  43    sh         cog 4942.469597
+## 172  43    sh    skewness    3.520068
+## 173  44     s         cog 6418.977372
+## 174  44     s    skewness    4.033747
+## 175  44    sh         cog 4966.294245
+## 176  44    sh    skewness    3.197896
+## 177  45     s         cog 6443.836211
+## 178  45     s    skewness    4.454511
+## 179  45    sh         cog 5146.418961
+## 180  45    sh    skewness    3.928895
+## 181  46     s         cog 6600.025372
+## 182  46     s    skewness    3.899980
+## 183  46    sh         cog 5172.443889
+## 184  46    sh    skewness    3.613111
+## 185  47     s         cog 6624.930918
+## 186  47     s    skewness    4.203507
+## 187  47    sh         cog 5269.466764
+## 188  47    sh    skewness    3.787853
+## 189  48     s         cog 6858.679552
+## 190  48     s    skewness    4.378206
+## 191  48    sh         cog 5584.319919
+## 192  48    sh    skewness    3.983187
+## 193  49     s         cog 7011.781168
+## 194  49     s    skewness    4.472666
+## 195  49    sh         cog 5738.089336
+## 196  49    sh    skewness    3.858932
+## 197  50     s         cog 7095.280802
+## 198  50     s    skewness    4.751733
+## 199  50    sh         cog 5921.294208
+## 200  50    sh    skewness    3.899484
+```
+---
+# 6
+
+
+``` r
+summary(fricatives_tidy)
+```
+
+```
+##       obs          sound           measurement            value         
+##  Min.   : 1.0   Length:200         Length:200         Min.   :   2.102  
+##  1st Qu.:13.0   Class :character   Class :character   1st Qu.:   3.465  
+##  Median :25.5   Mode  :character   Mode  :character   Median :1280.392  
+##  Mean   :25.5                                         Mean   :2425.292  
+##  3rd Qu.:38.0                                         3rd Qu.:4874.849  
+##  Max.   :50.0                                         Max.   :7095.281
+```
+
+---
+# 7
+
+
+``` r
+cog_data &lt;- fricatives_tidy |&gt;
+  filter(measurement == "cog")
+boxplot_cog &lt;- ggplot(cog_data, aes(x = sound, y = value, fill = sound)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Center of Gravity by Phoneme",
+       x = "Phoneme",
+       y = "Center of Gravity (Hz)")
+boxplot_cog
+```
+
+![](index_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+---
+
+``` r
+skewness_data &lt;- fricatives_tidy |&gt;
+  filter(measurement == "skewness")
+skewness_data |&gt;
+  ggplot()+
+  aes(x = sound, y = value, color = sound)+
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+  labs(title = "Mean and 95% Confidence Interval of Skewness by Phoneme",
+       x = "Phoneme",
+       y = "Skewness")
+```
+
+![](index_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+---
+# 8
+
+``` r
+model_data &lt;- fricatives_tidy |&gt;
+  filter(sound == "s") |&gt;
+  pivot_wider(
+    names_from = measurement,
+    values_from = value
+  ) |&gt;
+  select(obs, cog, skewness)
+model_data
+```
+
+```
+## # A tibble: 50 × 3
+##      obs   cog skewness
+##    &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt;
+##  1     1 3285.     2.72
+##  2     2 3511.     3.09
+##  3     3 4029.     3.33
+##  4     4 4123.     3.00
+##  5     5 4664.     2.88
+##  6     6 4680.     3.84
+##  7     7 4793.     3.53
+##  8     8 4811.     3.51
+##  9     9 4874.     3.43
+## 10    10 4879.     3.54
+## # ℹ 40 more rows
+```
+
+``` r
+lm &lt;- lm(cog ~ skewness, data = model_data)
+model_summary &lt;- summary(lm)
+model_summary
+```
+
+```
+## 
+## Call:
+## lm(formula = cog ~ skewness, data = model_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -996.88 -254.05  -25.71  278.99 1020.41 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   -756.7      532.1  -1.422    0.161    
+## skewness      1675.6      139.4  12.022 4.37e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 419.4 on 48 degrees of freedom
+## Multiple R-squared:  0.7507,	Adjusted R-squared:  0.7455 
+## F-statistic: 144.5 on 1 and 48 DF,  p-value: 4.373e-16
+```
+
+
+---
+# 9
+
+``` r
+model_data |&gt;
+  ggplot()+
+  aes(x = skewness, y = cog)+
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Scatter Plot of Center of Gravity vs. Skewness for [s] Segments",
+       x = "Skewness",
+       y = "Center of Gravity (Hz)")
+```
+
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
+![](index_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+---
+# 10
+
+
+``` r
+diagnosis(lm)
+```
+
+![](index_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+---
+# 11
+## Result
+### The R^2 is 0.7507 and adjust R^2 is 0.7455 show that skewness explains 75% variation of COG. The coefficient of skewness is 1675.6, which means that when skewness increase 1, the COG will increase1675.6 Hz.
+
+
+---
+# 12
+
+``` r
+assumptions &lt;- read_csv("C:/Users/Charles/OneDrive/桌面/pa4/data_raw/assumptions.csv")
+```
+
+```
+## Rows: 142 Columns: 2
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: ","
+## dbl (2): x, y
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+```
+
+``` r
+assumptions
+```
+
+```
+## # A tibble: 142 × 2
+##        x     y
+##    &lt;dbl&gt; &lt;dbl&gt;
+##  1  55.4  97.2
+##  2  51.5  96.0
+##  3  46.2  94.5
+##  4  42.8  91.4
+##  5  40.8  88.3
+##  6  38.7  84.9
+##  7  35.6  79.9
+##  8  33.1  77.6
+##  9  29.0  74.5
+## 10  26.2  71.4
+## # ℹ 132 more rows
+```
+
+``` r
+assumptions |&gt;
+  ggplot()+
+  aes(x = x, y = y)+
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  labs(title = "Scatter Plot of asssumptions",
+       x = "x",
+       y = "y")
+```
+
+![](index_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+---
+### The data doesn't seems like having relationship such as linear or quadratic. If using this data to fit a model, it won't have a good result.
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
