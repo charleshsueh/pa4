@@ -1,0 +1,39 @@
+---
+title: "Presentation Ninja"
+subtitle: "⚔<br/>with xaringan"
+author: "Yihui Xie"
+institute: "RStudio, PBC"
+date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: ["rutgers", "rutgers-fonts"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+# Hello
+
+## subsection
+
+[link](www/google.com)
+
+-list
+-hi
+-fnvdfododfj
+
+1. jk
+2. ml
+3. dl
+
+---
+# Hello again
+
+```{r}
+mod <- lm(mpg ~ drat, mtcars)
+knitr::kable(summary(mod)$coef)
+```
+
+

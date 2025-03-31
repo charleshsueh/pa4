@@ -1,0 +1,148 @@
+---
+title: "Presentation pa4"
+subtitle: "⚔<br/>with xaringan"
+author: "Charles Hsueh"
+institute: "ds4lin"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ds4ling)
+```
+
+---
+
+# 4
+
+```{r}
+fricatives <- read_csv("C:/Users/Charles/OneDrive/桌面/pa4/data_raw/fricatives.csv")
+fricatives
+
+```
+
+
+---
+# 5
+
+```{r}
+fricatives |>
+  pivot_longer(
+    cols = c(s_cog, s_skewness, sh_cog, sh_skewness),
+    names_to = c("sound", "measurement"),
+    names_pattern = "(s|sh)_(cog|skewness)",
+    values_to = "value"
+  ) |>
+  select(obs, sound, measurement, value) |>
+  arrange(obs, sound)|>
+  write.csv("C:/Users/Charles/OneDrive/桌面/pa4/data_tidy/fricatives_tidy.csv", row.names = FALSE)
+
+fricatives_tidy = read.csv("C:/Users/Charles/OneDrive/桌面/pa4/data_tidy/fricatives_tidy.csv")
+fricatives_tidy
+```
+---
+# 6
+
+```{r}
+summary(fricatives_tidy)
+```
+
+---
+# 7
+
+```{r}
+cog_data <- fricatives_tidy |>
+  filter(measurement == "cog")
+boxplot_cog <- ggplot(cog_data, aes(x = sound, y = value, fill = sound)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Center of Gravity by Phoneme",
+       x = "Phoneme",
+       y = "Center of Gravity (Hz)")
+boxplot_cog
+```
+---
+```{r}
+skewness_data <- fricatives_tidy |>
+  filter(measurement == "skewness")
+skewness_data |>
+  ggplot()+
+  aes(x = sound, y = value, color = sound)+
+  stat_summary(fun.data = mean_cl_normal, geom = "pointrange") +
+  labs(title = "Mean and 95% Confidence Interval of Skewness by Phoneme",
+       x = "Phoneme",
+       y = "Skewness")
+
+
+```
+
+---
+# 8
+```{r}
+model_data <- fricatives_tidy |>
+  filter(sound == "s") |>
+  pivot_wider(
+    names_from = measurement,
+    values_from = value
+  ) |>
+  select(obs, cog, skewness)
+model_data
+
+lm <- lm(cog ~ skewness, data = model_data)
+model_summary <- summary(lm)
+model_summary
+```
+
+
+---
+# 9
+```{r}
+model_data |>
+  ggplot()+
+  aes(x = skewness, y = cog)+
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Scatter Plot of Center of Gravity vs. Skewness for [s] Segments",
+       x = "Skewness",
+       y = "Center of Gravity (Hz)")
+```
+
+---
+# 10
+
+```{r, message=FALSE, warning=FALSE}
+diagnosis(lm)
+```
+---
+# 11
+## Result
+### The R^2 is 0.7507 and adjust R^2 is 0.7455 show that skewness explains 75% variation of COG. The coefficient of skewness is 1675.6, which means that when skewness increase 1, the COG will increase1675.6 Hz.
+
+
+---
+# 12
+```{r}
+assumptions <- read_csv("C:/Users/Charles/OneDrive/桌面/pa4/data_raw/assumptions.csv")
+assumptions
+```
+```{r, message=FALSE, warning=FALSE}
+assumptions |>
+  ggplot()+
+  aes(x = x, y = y)+
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  labs(title = "Scatter Plot of asssumptions",
+       x = "x",
+       y = "y")
+```
+---
+### The data doesn't seems like having relationship such as linear or quadratic. If using this data to fit a model, it won't have a good result.
+---

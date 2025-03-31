@@ -1,0 +1,251 @@
+---
+title: "HW1 time series"
+author: "Chun-Chein Hsueh"
+date: "2025-02-15"
+output: html_document
+---
+```{r}
+#| echo: false
+
+knitr::include_graphics('C:/Users/Charles/OneDrive/桌面/Hw1.jpeg')
+```
+
+Probem 1 
+
+(d)
+```{r}
+set.seed(123)
+n <- 250
+omega <- pi / 4
+t <- 1:n
+
+# Generate 3 independent A and Theta
+simulate_series <- function(n, omega) {
+  A <- rchisq(n, df=1)
+  Theta <- runif(1, 0, 2 * pi)  
+  x <- A * cos(omega * t + Theta)
+  return(x)
+}
+
+x1 <- simulate_series(n, omega)
+x2 <- simulate_series(n, omega)
+x3 <- simulate_series(n, omega)
+
+# draw 3 plots
+par(mfrow=c(3,1))  
+plot(t, x1, type="l", col="blue", main="Simulated Series 1", ylab="x_t", xlab="Time")
+plot(t, x2, type="l", col="red", main="Simulated Series 2", ylab="x_t", xlab="Time")
+plot(t, x3, type="l", col="green", main="Simulated Series 3", ylab="x_t", xlab="Time")
+par(mfrow=c(1,1))
+```
+
+Problem 3
+
+(a)
+```{r}
+# Read data
+data <- read.table("uscovid22.txt", header=FALSE, col.names=c("Date", "Cases"))
+data$Date <- as.Date(data$Date)  # transform date format
+
+# log transformation
+data$LogCases <- log(data$Cases)
+
+# plot the origin data and log transform data
+par(mfrow=c(2,1))
+plot(data$Date, data$Cases, type="l", col="blue", main="Daily COVID-19 Cases (Millions)", ylab="Cases", xlab="Date")
+plot(data$Date, data$LogCases, type="l", col="red", main="Log Transformed Daily Cases", ylab="Log(Cases)", xlab="Date")
+```
+
+Comment: COVID-19 daily case counts tend to exhibit high variability, especially during surges. Taking the logarithm helps to stabilize the variance. Furthermore, raw case numbers are often right-skewed, meaning there are occasional extreme values. Log transformation helps to normalize the distribution, making statistical analysis more robust.
+
+(b)
+```{r}
+library(zoo)
+weighted_ma <- function(x) {
+  if (length(x) < 7) return(NA)  
+  weights <- c(0.5, 1, 1, 1, 1, 1, 0.5) / 6  
+  return(sum(x * weights, na.rm = TRUE))
+}
+
+data$Weighted_MA7 <- rollapply(data$LogCases, width = 7, FUN = weighted_ma, align = "center", fill = NA)
+
+# 繪製移動平均曲線
+plot(data$Date, data$LogCases, type="l", col="red", main="Log Transformed Cases with 7-point Weighted Moving Average", ylab="Log(Cases)", xlab="Date")
+lines(data$Date, data$Weighted_MA7, col="blue", lwd=2)
+legend("topright", legend=c("Log Cases", "7-point Weighted MA"), col=c("red", "blue"), lwd=2)
+```
+
+(c)
+```{r}
+data$Detrended <- data$LogCases - data$Weighted_MA7
+
+plot(data$Date, data$Detrended, type="l", col="blue", main="De-trended Log Cases", ylab="Detrended Log(Cases)", xlab="Date")
+```
+
+Comment: Using 7 day moving average to remove long term trend. The trend becomes stable and the average is a constant, and it can be seen that the periodicity. 
+
+(d)
+```{r}
+data$Seasonal_Component <- rollmean(data$Detrended, k=52, fill=NA, align="center")
+
+# estimate de-seasoned series
+data$Deseasoned <- data$Detrended - data$Seasonal_Component
+
+plot(data$Date, data$Deseasoned, type="l", col="blue", main="De-Seasoned Log Cases", ylab="De-Seasoned Log(Cases)", xlab="Date")
+```
+
+
+(e)
+```{r}
+plot(data$Date, data$Deseasoned, type="l", col="blue", main="Final De-Trended and De-Seasoned Series", ylab="Processed Log(Cases)", xlab="Date")
+```
+
+Comment: The trend becomes stable and the average is a constant. It can be seen that the periodicity which is long term and doesn't affect by seasonal effect. 
+
+(f)
+```{r}
+acf(data$Deseasoned, na.action=na.omit, main="ACF of De-Trended and De-Seasoned Log Cases")
+```
+
+(g)
+
+```{r}
+Box.test(na.omit(data$Deseasoned), lag=1, type="Ljung-Box")
+```
+
+(h)
+```{r}
+Box.test(na.omit(data$Deseasoned), lag=10, type="Ljung-Box")  # test 10 lag
+```
+
+Problem 4
+
+(a)
+```{r}
+#| warning: false
+
+library(readr)
+library(ggplot2)
+library(forecast)
+library(tseries)
+
+# Read data
+data <- read.table("hawaii-new.dat")
+colnames(data) <- c("YearMonth", "Total", "West", "East")
+data$YearMonth <- as.Date(paste0(data$YearMonth, "01"), format="%Y%m%d")
+
+ts_total <- ts(data$Total, start = c(1970, 1), frequency = 12)
+ts_west <- ts(data$West, start = c(1970, 1), frequency = 12)
+ts_east <- ts(data$East, start = c(1970, 1), frequency = 12)
+
+# Draw 3 time series plots
+plot.ts(cbind(ts_total, ts_west, ts_east), main="Tourist Arrivals in Hawaii")
+```
+
+Comment: 
+
+1.Trend: Between 1970 and 1995, the overall number of tourists increased, and Hawaii's tourism industry continued to grow. The trends of the West and East series are roughly the same as those of the Total series.
+
+2.Season: There are obvious seasonal fluctuations every year. Summer is the most popular time for tourism, while early summer and the end of the year are less popular.
+
+3.Variance: The tourism industry continues to grow, and the magnitude of fluctuations varies greatly year by year.
+
+4.Outliers: Some years may have abnormal lows or peaks.
+
+(b)
+```{r}
+log_total <- log(ts_total)
+autoplot(log_total) + ggtitle("Log Transformed Total Series")
+```
+
+Comment: Log transformation reduces heterogeneity and smoothes the variability that increases over time. But trends and seasonality are still there. Outliers are more obvious.
+
+(c)
+```{r}
+# 確保 time 變數正確
+time <- seq_len(length(log_total))
+
+# 建立不同階數的多項式趨勢模型
+model_linear <- lm(log_total ~ time)
+model_quadratic <- lm(log_total ~ time + I(time^2))
+model_cubic <- lm(log_total ~ time + I(time^2) + I(time^3))
+model_quartic <- lm(log_total ~ time + I(time^2) + I(time^3) + I(time^4))
+
+# 計算 AIC
+aic_values <- data.frame(
+  Model = c("Linear", "Quadratic", "Cubic", "Quartic"),
+  AIC = c(AIC(model_linear), AIC(model_quadratic), AIC(model_cubic), AIC(model_quartic))
+)
+
+# 確保 AIC 計算正常
+print(aic_values)
+if (any(is.na(aic_values$AIC))) {
+  stop("AIC 計算出現 NA，請檢查模型是否有問題！")
+}
+
+# 選擇 AIC 最小的模型
+best_index <- which.min(aic_values$AIC)
+best_model <- list(model_linear, model_quadratic, model_cubic, model_quartic)[[best_index]]
+best_order <- aic_values$Model[best_index]
+cat("Best model selected:", best_order, "\n")
+
+# 確保 fitted 值不是空的
+if (length(fitted(best_model)) == 0) {
+  stop("fitted(best_model) 為空，請檢查模型參數設定！")
+}
+
+# 轉換為 ts 物件
+best_fitted <- ts(fitted(best_model), start=start(log_total), frequency=frequency(log_total))
+
+# 繪製最佳趨勢模型
+plot(log_total, type="l", col="blue", main=paste("Best Polynomial Trend Model:", best_order))
+lines(best_fitted, col="red")
+
+# 計算去趨勢後的數據，並保留時間序列屬性
+detrended <- log_total - best_fitted
+detrended <- ts(detrended, start=start(log_total), frequency=frequency(log_total))
+plot(detrended, type="l", main="De-trended Series")
+
+```
+
+Comment: I would choose quadratic polynomial model since the plot seems like nonlinear, with signs of accelerating growth or slight slowdown. The results of AIC indicates that we should choose quadratic in order to avoid overfitting, the cubic model has no significant improve. After the actual fitting, the quadratic term is significant and there is no obvious pattern in the residual graph, which told us that is a good fit. The fitted line captures the general trend, but there are still fluctuations in some segments that are not fully explained, indicating the presence of seasonality or short-term disturbances.
+
+(d)
+```{r}
+tsm <- tslm(log_total ~ trend + season)
+fitted_vals <- fitted(tsm)
+detrend_deseason <- log_total - fitted_vals
+
+plot(log_total, main="Trend-Seasonal Model Fitted Values")
+lines(fitted_vals, col="red")
+plot(detrend_deseason, main="De-trended and De-seasoned Series")
+```
+```{r}
+# Show the estimated coefficients of the seasonal factors
+seasonal_coeff <- coefficients(tsm)[grep("season", names(coefficients(tsm)))]
+print(seasonal_coeff)
+```
+Comment: March, June, July, August have the higher amounts of visitors based on January. In comparison, Feb. and Sept. have lower number of visitors.
+(e)
+```{r}
+h <- 12  
+new_trend <- max(time) + (1:h)  
+new_season <- rep(1:12, length = h) 
+newdata <- data.frame(trend = new_trend, season = factor(new_season))
+forecast_tsm <- forecast(tsm, newdata = newdata)
+
+plot(forecast_tsm, main="Forecast for 1996")
+lines(tail(log_total, 36), col="blue")
+```
+
+(f)
+```{r}
+ndiffs(log_total)
+diff_log_total <- diff(log_total, differences = 1)
+autoplot(diff_log_total) + ggtitle("Differenced Log Transformed Total Series")
+
+adf.test(diff_log_total)
+```
+
+
+

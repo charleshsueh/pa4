@@ -1,0 +1,7 @@
+"0",""
+"0","#call dataframe and 'pipe' into ggplot function"
+"0","#add aesthetic mapping to x and y axis"
+"0",""
+"0","mtcars |>"
+"0","  ggplot() +"
+"0","  aes( x = disp, y = mpg)"

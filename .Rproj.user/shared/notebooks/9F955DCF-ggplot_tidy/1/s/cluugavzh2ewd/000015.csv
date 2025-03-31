@@ -1,0 +1,5 @@
+"0",""
+"0","mtcars |>"
+"0","  ggplot() +"
+"0","  aes( x = factor(am), y = mpg)+ #we sdd a layer to the plot"
+"0","  geom_boxplot()"

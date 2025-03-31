@@ -1,0 +1,225 @@
+---
+title: "ggplot and tidy"
+author: "Chunchein Hsueh"
+date: "2025-02-10"
+output: html_document
+---
+
+```{r}
+#| label: load-libs
+
+library('tidyverse')
+library('ggplot2')
+```
+
+```{r}
+#| label: explore
+
+glimpse(mtcars)
+head(mtcars)
+dim(mtcars)
+summary(mtcars)
+```
+```{r}
+#| label: some-plot
+
+mtcars |>
+  ggplot()
+
+#call dataframe and 'pipe' into ggplot function
+#add aesthetic mapping to x and y axis
+
+mtcars |>
+  ggplot() +
+  aes( x = disp, y = mpg)
+
+#call dataframe and 'pipe' into ggplot function
+#add aesthetic mapping to x and y axis
+#add geometric object (geom_point)
+mtcars |>
+  ggplot() +
+  aes( x = disp, y = mpg)+ #we sdd a layer to the plot
+  geom_point()
+
+mtcars |>
+  ggplot() +
+  aes( x = factor(am), y = mpg)+ #we sdd a layer to the plot
+  geom_boxplot()
+
+mtcars |>
+  ggplot() +
+  aes( x = disp, y = mpg)+ #we sdd a layer to the plot
+  stat_summary(
+    fun.data = mean_sdl,
+    geom = 'pointrange'
+  )
+
+```
+
+
+
+
+```{r}
+#| label: simple transformation
+
+# Select columns with 'select()'
+mtcars |>
+  select(mpg, poo = disp, am)
+
+
+mtcars |>
+  select(mpg:drat)
+
+# use the select() function to select any 3 variables
+select(mtcars, cyl, hp, am)
+
+# use the select() function to select the last 3 variables
+select(mtcars, am:carb)
+
+# use the select() function to rename mpg to hello_world
+select(mtcars, hello_world=mpg)
+
+
+# Select columns with 'select()'
+#use mutate to add a new column
+mtcars |>
+  select(mpg, poo = disp, am) |>
+  filter(am == 1, mpg >= 3) |>
+  mutate(z_mpg =( mpg - mean(mpg)) / sd(mpg))
+
+
+# filter rows in which mpg is less than 20 and greater than 14
+filter(mtcars, mpg<20, mpg>14)
+filter(mtcars, mpg<20 & mpg>14)
+# filter rows in which cyl is equal to 6
+mtcars |>
+  filter(cyl==6)
+# filter rows in which mpg is greater than 20 or disp is less than 200
+mtcars |>
+  filter(mpg>20 | disp<200)
+
+#arrange the mtcars dataset based on cyl and disp
+arrange(mtcars, cyl, disp)
+#arrange the mtcars dataset based on mpg from highest to lowest
+arrange(mtcars, desc(mpg))
+
+
+mtcars |>
+  group_by(am)|>
+  summarise(
+    avg = mean(mpg),
+    sd = sd(mpg)
+  )
+
+
+
+
+# create a new column called mpg_x2 that doubles 
+# every value in the dataframe
+mtcars |>
+  select(mpg) |>
+  mutate(mpg_x2 =mpg*2)
+# create a new column called mpg_c that centers the 
+# mpg data by subtracting the mean value of mpg from
+# every value in the dataframe
+mtcars |>
+  select(mpg) |>
+  mutate(mpg_c = mpg-mean(mpg)) 
+
+# create a new column called value that applies 
+# the label 'good' to cars that get over 18 mpg
+# and the label 'bad' to cars that get mpg 18 or less
+
+mtcars |>
+  select(mpg) |>
+  mutate(value = if_else(mpg>18,'good','bad')) 
+
+mtcars |>
+  select(mpg) |>
+  mutate(value = if_else(
+    condition = mpg>18,
+    true = 'good',
+    false = 'bad'
+    )
+  ) 
+
+# create new column called 'opinion '
+# if mpg greater than 20, then 'good'
+# if 15<mpg<20, then 'meh'
+# if less than 15 then 'bad'
+mtcars |>
+  select(mpg) |>
+  mutate(opinion = case_when(
+    mpg>=20       ~ 'good',
+    mpg>15&mpg<20 ~ 'meh',
+    mpg<=15       ~ 'bad'
+    )
+  ) |>
+  ggplot() +
+  aes(x = opinion, y = mpg) + 
+  geom_boxplot()
+# Calculate the mean of mpg
+mtcars |>
+  summarise(avg = mean(mpg))
+# Calculate the mean value of mpg as a function of cyl
+mtcars |>
+  group_by(cyl) |>
+  summarise(avg = mean(mpg))
+# Calculate the mean, standard deviation, minimum, maximum value of mpg as a function of cyl
+mtcars |>
+  group_by(cyl) |>
+  summarise(
+    avg = mean(mpg),
+    std = sd(mpg),
+    mn = min(mpg),
+    mx = min(mpg)
+  )
+
+
+```
+
+```{r}
+# tidy
+library(untidydata)
+
+pre_post|>
+  separate(
+    col = id,
+    into = c("lang", "Num"),
+    sep = 4,
+    remove = FALSE
+  )|>
+  separate(
+    col = spec,
+    into = c("Group","prof"),
+    sep = "_"
+  )
+
+pre_post|>
+  pivot_longer(
+    cols = c("test1", "test2"),
+    names_to = "test",
+    values_to = "scores"
+  )|>
+  pivot_wider(
+    names_from = test,
+    values_from = scores
+  )|>
+  mutate(diff = test2-test1)
+
+language_diversity|>
+  pivot_wider(
+    names_from = Measurement,
+    values_from = Value
+  )|>
+  write.csv("./data/lang_tidy.csv")
+
+read.csv("./data/lang_tidy.csv")
+  
+
+
+```
+
+
+
+

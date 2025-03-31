@@ -1,0 +1,8 @@
+"0","model_data <- fricatives_tidy |>"
+"0","  filter(sound == ""s"") |>"
+"0","  pivot_wider("
+"0","    names_from = measurement,"
+"0","    values_from = value"
+"0","  ) |>"
+"0","  select(obs, cog, skewness)"
+"0","model_data"

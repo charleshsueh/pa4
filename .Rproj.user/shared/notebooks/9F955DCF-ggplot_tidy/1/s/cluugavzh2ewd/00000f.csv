@@ -1,0 +1,4 @@
+"0","#| label: some-plot"
+"0",""
+"0","mtcars |>"
+"0","  ggplot()"

@@ -1,0 +1,8 @@
+"0","model_data |>"
+"0","  ggplot()+"
+"0","  aes(x = skewness, y = cog)+"
+"0","  geom_point(color = ""blue"", size = 3, alpha = 0.6) +"
+"0","  geom_smooth(method = ""lm"", color = ""red"", se = TRUE) +"
+"0","  labs(title = ""Scatter Plot of Center of Gravity vs. Skewness for [s] Segments"","
+"0","       x = ""Skewness"","
+"0","       y = ""Center of Gravity (Hz)"")"
